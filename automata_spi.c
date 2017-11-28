@@ -78,9 +78,16 @@ SPI_RETURN_T SPI_transferBlocking(const SPI_TRANSFER_T *transfer)
 	}
 	else
 	{
-		SPI_Send_Receive_Bytes(transfer->tx_data, transfer->rx_data, transfer.number_of_bytes); // MCU dependent SPI function to send and receive bytes
+		#define SPI_ERROR	-1
 		
-		return  _SPI_RETURN.SPI_RETURN_ok;
+		if (SPI_Send_Receive_Bytes(transfer->tx_data, transfer->rx_data, transfer.number_of_bytes) // MCU dependent SPI function to send and receive bytes
+		{
+			return SPI_ERROR
+		}
+		else
+		{
+			return  _SPI_RETURN.SPI_RETURN_ok;
+		}
 	}
 }
 
@@ -126,41 +133,35 @@ SPI_RETURN_T AS5047D_configure(const AS5047D_CONFIG_T *config, const SPI_TRANSFE
 }
 
 
-/* AS5047D register read function */
-SPI_RETURN_T AS5047D_register_read(const SPI_TRANSFER_T *transfer)
-{
-	if (transfer == NULL)
-	{
-		return _SPI_RETURN.SPI_RETURN_nullptr;
-	}
-	else
-	{
-		uint8_t TX_DATA[] = {ERRFL_ADDR, ANGLECOM_ADDR};
-		
-		transfer->tx_data = TX_DATA;
-		transfer->number_of_bytes = 3;
-		
-		SPI_transferBlocking(transfer);
-		
-		return  _SPI_RETURN.SPI_RETURN_ok;
-	}
-}
-
 // example of AS5047D_register_read usage when reading an angle in degrees
 void a_function(void)
 {
 	//...
+	
 	#define NO_OF_BYTES	3
 	uint8_t				SPI_return;
-	uint8_t 			AS5047D_values[NO_OF_BYTES]; // read bytes buffer
-	uint16_t			angle = 0;
-	SPI_TRANSFER_T 		transfer;
+	uint8_t 			RX_DATA[NO_OF_BYTES];
+	uint8_t 			TX_DATA[] = {ERRFL_ADDR, ANGLECOM_ADDR};
+	uint8_t				error;
+	uint16_t			angle = 0, angleRaw = 0;
+
+	
+	SPI_TRANSFER_T 		transfer;		
+	transfer->rx_data = RX_DATA;
+	transfer->tx_data = TX_DATA;
+	transfer->number_of_bytes = NO_OF_BYTES;
 	
 	//...
-	SPI_return = AS5047D_register_read(transfer);
-	memccpy(transfer->rx_data, AS5047D_values, NO_OF_BYTES);
-	angle = AS5047D_values[1];
-	angle += AS5047D_values[2] << 8;
-	angle = angle / (double)45.0; // (16,383 / 360)
+	
+	SPI_return = SPI_transferBlocking(transfer);
+	error =  RX_DATA[0];
+	angleRaw = RX_DATA[1];
+	angleRaw += RX_DATA[2] << 8;
+	angle = angleRaw / (double)45.0; // (16,383 / 360)
+	
+	//...
+	
+	return SPI_return;
+	
 	//...
 }
