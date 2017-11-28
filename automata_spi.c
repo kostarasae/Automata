@@ -72,13 +72,13 @@ SPI_RETURN_T SPI_transferBlocking(const SPI_TRANSFER_T *transfer)
 	{
 		return _SPI_RETURN.SPI_RETURN_nullptr;
 	}
-	else if (config.number_of_bytes == 0)
+	else if (transfer.number_of_bytes == 0)
 	{
 		return _SPI_RETURN.SPI_RETURN_invalid_arg;
 	}
 	else
 	{
-		SPI_Send_Receive_Bytes(config.tx_data, config.rx_data, config.number_of_bytes); // MCU dependent SPI function to send and receive bytes
+		SPI_Send_Receive_Bytes(transfer->tx_data, transfer->rx_data, transfer.number_of_bytes); // MCU dependent SPI function to send and receive bytes
 		
 		return  _SPI_RETURN.SPI_RETURN_ok;
 	}
@@ -100,9 +100,10 @@ typedef struct _AS5047D_CONFIG {
 
 
 /* AS5047D configuration function */
-SPI_RETURN_T AS5047D_configure(const AS5047D_CONFIG_T *config)
+SPI_RETURN_T AS5047D_configure(const AS5047D_CONFIG_T *config, const SPI_TRANSFER_T *transfer)
 {
-	if (config == NULL)
+	if (config == NULL ||
+		transfer == NULL)
 	{
 		return _SPI_RETURN.SPI_RETURN_nullptr;
 	}
@@ -115,39 +116,49 @@ SPI_RETURN_T AS5047D_configure(const AS5047D_CONFIG_T *config)
 	{
 		uint8_t TX_DATA[] = {SETTINGS1_ADDR, config.SETTINGS1, SETTINGS2_ADDR, config.SETTINGS2};
 		
-		SPI_TRANSFER_T *transfer;
-		
 		transfer->tx_data = TX_DATA;
 		transfer->number_of_bytes = 4;
 		
 		SPI_transferBlocking(transfer);
+		
+		return  _SPI_RETURN.SPI_RETURN_ok;
 	}
 }
 
 
 /* AS5047D register read function */
-uint8_t * AS5047D_register_read(void)
+SPI_RETURN_T AS5047D_register_read(const SPI_TRANSFER_T *transfer)
 {
-	uint8_t TX_DATA[] = {ERRFL_ADDR, ANGLECOM_ADDR};
-	
-	SPI_TRANSFER_T *transfer;
-	
-	transfer->tx_data = TX_DATA;
-	transfer->number_of_bytes = 3;
-	
-	SPI_transferBlocking(transfer);
-	
-	return transfer->rx_data;
+	if (transfer == NULL)
+	{
+		return _SPI_RETURN.SPI_RETURN_nullptr;
+	}
+	else
+	{
+		uint8_t TX_DATA[] = {ERRFL_ADDR, ANGLECOM_ADDR};
+		
+		transfer->tx_data = TX_DATA;
+		transfer->number_of_bytes = 3;
+		
+		SPI_transferBlocking(transfer);
+		
+		return  _SPI_RETURN.SPI_RETURN_ok;
+	}
 }
 
-// example of angle reading in degrees
+// example of AS5047D_register_read usage when reading an angle in degrees
 void a_function(void)
 {
 	//...
-	uint8_t 	AS5047D_values[3]; // read bytes buffer
-	uint16_t	angle = 0;
+	#define NO_OF_BYTES	3
+	uint8_t				SPI_return;
+	uint8_t 			AS5047D_values[NO_OF_BYTES]; // read bytes buffer
+	uint16_t			angle = 0;
+	SPI_TRANSFER_T 		transfer;
+	
 	//...
-	AS5047D_values = AS5047D_register_read();
+	SPI_return = AS5047D_register_read(transfer);
+	memccpy(transfer->rx_data, AS5047D_values, NO_OF_BYTES);
 	angle = AS5047D_values[1];
 	angle += AS5047D_values[2] << 8;
 	angle = angle / (double)45.0; // (16,383 / 360)
