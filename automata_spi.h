@@ -1,5 +1,12 @@
-#ifndef _AUTOMATA_SPI_H
-#define _AUTOMATA_SPI_H
+/*
+ * automata_spi.h
+ *
+ *  Created on: 28 Nov 2017
+ *      Author: Kostas Stamatakis
+ */
+
+#ifndef AUTOMATA_SPI_H_
+#define AUTOMATA_SPI_H_
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -51,4 +58,4 @@ SPI_RETURN_T SPI_configureTransfer(const SPI_CONFIG_T *config);
 /* SPI transfer */
 SPI_RETURN_T SPI_transferBlocking(const SPI_TRANSFER_T *transfer);
 
-#endif /* _AUTOMATA_SPI_H */
+#endif /* AUTOMATA_SPI_H_ */
