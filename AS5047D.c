@@ -65,15 +65,15 @@ AS5047D_RETURN_T AS5047D_checkFrame(const uint8_t *data, uint32_t bytes)
 AS5047D_RETURN_T AS5047D_configure(const AS5047D_CONFIG_T *config, const AS5047D_TRANSFER_T *transfer)
 {
 	AS5047D_checkNullPointer(config);
+	
 	AS5047D_checkNullPointer(transfer);
 
 	AS5047D_checkConfiguration(config);
 
-	uint8_t TX_DATA[] = {config->SETTINGS1_ADDR, config->SETTINGS1, config->SETTINGS2_ADDR, config->SETTINGS2};
-	transfer->tx_data = TX_DATA;
-
 	AS5047D_checkFrame(transfer->tx_data, transfer->number_of_bytes);
+	
 	AS5047D_transferBlocking(transfer);
+	
 	AS5047D_checkFrame(transfer->rx_data, transfer->number_of_bytes);
 
 	return  AS5047D_RETURN_T::AS5047D_RETURN_ok;
