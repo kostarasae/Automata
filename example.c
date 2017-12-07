@@ -22,6 +22,20 @@ extern AS5047D_RETURN_T AS5047D_configure(const AS5047D_CONFIG_T *config, const 
 void a_function(void)
 {
 	//...
+	#define NO_OF_REGISTERS		2
+	#define NO_OF_REGISTERS_AS5047D	4
+	#define BYTES_PER_REGISTER	2
+	#define NO_OF_BYTES_AS5047D	(NO_OF_REGISTERS_AS5047D * BYTES_PER_REGISTER)
+	#define NO_OF_BYTES		(NO_OF_REGISTERS * BYTES_PER_REGISTER)
+	//...
+	AS5047D_CONFIG_T		configAS5047D;
+	configAS5047D->SETTINGS1_ADDR	= SETTINGS1_ADDR;
+	configAS5047D->SETTINGS2_ADDR	= SETTINGS2_ADDR;
+	//...
+	uint8_t 			RX_DATA[NO_OF_BYTES], RX_DATA_AS5047D[NO_OF_BYTES];
+	uint8_t 			TX_DATA[] = {ERRFL_ADDR, ANGLECOM_ADDR};
+	uint8_t				TX_DATA_AS5047D[] = {configAS5047D->SETTINGS1_ADDR, configAS5047D->SETTINGS1, configAS5047D->SETTINGS2_ADDR, configAS5047D->SETTINGS2};
+	//...
 	SPI_CONFIG_T			configSPI;
 	//...
 	SPI_TRANSFER_T 			transfer;
@@ -29,24 +43,12 @@ void a_function(void)
 	transfer->tx_data 		= TX_DATA;
 	transfer->number_of_bytes 	= NO_OF_BYTES;
 	//...
-	AS5047D_CONFIG_T		configAS5047D;
-	configAS5047D->SETTINGS1_ADDR	= SETTINGS1_ADDR;
-	configAS5047D->SETTINGS2_ADDR	= SETTINGS2_ADDR;
-	//...
 	AS5047D_TRANSFER_T 		transferAS5047D;
 	transfer->rx_data 		= RX_DATA_AS5047D;
 	transfer->tx_data 		= TX_DATA_AS5047D;
 	transfer->number_of_bytes 	= NO_OF_BYTES_AS5047D;
 	//...
-	#define NO_OF_REGISTERS		2
-	#define NO_OF_REGISTERS_AS5047D	4
-	#define BYTES_PER_REGISTER	2
-	#define NO_OF_BYTES_AS5047D	(NO_OF_REGISTERS * BYTES_PER_REGISTER_AS5047D)
-	#define NO_OF_BYTES		(NO_OF_REGISTERS * BYTES_PER_REGISTER)
 	uint8_t				Returns;
-	uint8_t 			RX_DATA[NO_OF_BYTES], RX_DATA_AS5047D[NO_OF_BYTES];
-	uint8_t 			TX_DATA[] = {ERRFL_ADDR, ANGLECOM_ADDR};
-	uint8_t				TX_DATA_AS5047D[] = {configAS5047D->SETTINGS1_ADDR, configAS5047D->SETTINGS1, configAS5047D->SETTINGS2_ADDR, configAS5047D->SETTINGS2}; 
 	uint8_t				error;
 	uint16_t			angle = 0, angleRaw = 0;
 	uint32_t			angleTemp = 0;
