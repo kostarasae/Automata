@@ -72,10 +72,6 @@ AS5047D_RETURN_T AS5047D_configure(const AS5047D_CONFIG_T *config, const AS5047D
 	uint8_t TX_DATA[] = {config->SETTINGS1_ADDR, config->SETTINGS1, config->SETTINGS2_ADDR, config->SETTINGS2};
 	transfer->tx_data = TX_DATA;
 
-	#define NO_OF_REGISTERS		4
-	#define BYTES_PER_REGISTER	2
-	transfer->number_of_bytes = NO_OF_REGISTERS * BYTES_PER_REGISTER;
-
 	AS5047D_checkFrame(transfer->tx_data, transfer->number_of_bytes);
 	AS5047D_transferBlocking(transfer);
 	AS5047D_checkFrame(transfer->rx_data, transfer->number_of_bytes);
